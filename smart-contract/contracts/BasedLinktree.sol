@@ -206,4 +206,10 @@ contract BaseLinktree is Ownable, ReentrancyGuard {
         }
     }
     
+    // Emergency functions (only owner)
+    function emergencyUpdateProfile(address user, string memory newCID) external onlyOwner {
+        require(profiles[user].exists, "Profile does not exist");
+        profiles[user].ipfsCID = newCID;
+        profiles[user].updatedAt = block.timestamp;
+    }
 }
