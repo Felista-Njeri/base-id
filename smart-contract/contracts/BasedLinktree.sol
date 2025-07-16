@@ -132,5 +132,48 @@ contract BaseLinktree is Ownable, ReentrancyGuard {
         
         return result;
     }
- 
+    
+    // Get leaderboard by views
+    function getTopProfiles(uint256 limit) external view returns (address[] memory, uint256[] memory) {
+        require(limit <= allUsers.length, "Limit too high");
+        
+        // Create arrays for sorting
+        address[] memory addresses = new address[](allUsers.length);
+        uint256[] memory views = new uint256[](allUsers.length);
+        
+        // Copy data
+        for (uint256 i = 0; i < allUsers.length; i++) {
+            addresses[i] = allUsers[i];
+            views[i] = profiles[allUsers[i]].views;
+        }
+        
+        // Simple bubble sort (not gas efficient for large arrays, but works for MVP)
+        for (uint256 i = 0; i < allUsers.length - 1; i++) {
+            for (uint256 j = 0; j < allUsers.length - i - 1; j++) {
+                if (views[j] < views[j + 1]) {
+                    // Swap views
+                    uint256 tempViews = views[j];
+                    views[j] = views[j + 1];
+                    views[j + 1] = tempViews;
+                    
+                    // Swap addresses
+                    address tempAddr = addresses[j];
+                    addresses[j] = addresses[j + 1];
+                    addresses[j + 1] = tempAddr;
+                }
+            }
+        }
+        
+        // Return top profiles
+        address[] memory topAddresses = new address[](limit);
+        uint256[] memory topViews = new uint256[](limit);
+        
+        for (uint256 i = 0; i < limit; i++) {
+            topAddresses[i] = addresses[i];
+            topViews[i] = views[i];
+        }
+        
+        return (topAddresses, topViews);
+    }
+    
 }
