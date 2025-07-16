@@ -77,4 +77,29 @@ contract BaseLinktree is Ownable, ReentrancyGuard {
         emit ProfileCreated(msg.sender, ipfsCID, block.timestamp);
         emit UsernameRegistered(msg.sender, username, block.timestamp);
     }
+    
+    // Update existing profile
+    function updateProfile(string memory newIpfsCID) external profileExists(msg.sender) nonReentrant {
+        require(bytes(newIpfsCID).length > 0, "IPFS CID cannot be empty");
+        
+        string memory oldCID = profiles[msg.sender].ipfsCID;
+        profiles[msg.sender].ipfsCID = newIpfsCID;
+        profiles[msg.sender].updatedAt = block.timestamp;
+        
+        emit ProfileUpdated(msg.sender, oldCID, newIpfsCID, block.timestamp);
+    }
+    
+    // Get profile by address
+    function getProfile(address user) external view returns (Profile memory) {
+        require(profiles[user].exists, "Profile does not exist");
+        return profiles[user];
+    }
+    
+    // Get profile by username
+    function getProfileByUsername(string memory username) external view returns (Profile memory) {
+        address userAddress = usernameToAddress[username];
+        require(userAddress != address(0), "Username not found");
+        return profiles[userAddress];
+    }
+    
 }
