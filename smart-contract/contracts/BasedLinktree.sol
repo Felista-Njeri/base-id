@@ -176,4 +176,34 @@ contract BaseLinktree is Ownable, ReentrancyGuard {
         return (topAddresses, topViews);
     }
     
+    // Internal function to validate username format
+    function isValidUsername(string memory username) internal pure returns (bool) {
+        bytes memory usernameBytes = bytes(username);
+        
+        for (uint256 i = 0; i < usernameBytes.length; i++) {
+            bytes1 char = usernameBytes[i];
+            
+            // Allow a-z, A-Z, 0-9, underscore, and hyphen
+            if (!(char >= 0x30 && char <= 0x39) && // 0-9
+                !(char >= 0x41 && char <= 0x5A) && // A-Z
+                !(char >= 0x61 && char <= 0x7A) && // a-z
+                !(char == 0x5F) && // underscore
+                !(char == 0x2D)) { // hyphen
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    // Get contract stats
+    function getStats() external view returns (uint256 totalUsers, uint256 totalViews) {
+        totalUsers = totalProfiles;
+        totalViews = 0;
+        
+        for (uint256 i = 0; i < allUsers.length; i++) {
+            totalViews += profiles[allUsers[i]].views;
+        }
+    }
+    
 }
