@@ -30,5 +30,51 @@ contract BaseLinktree is Ownable, ReentrancyGuard {
     uint256 public totalProfiles;
     uint256 public constant MAX_USERNAME_LENGTH = 20;
     uint256 public constant MIN_USERNAME_LENGTH = 3;
-
+    
+    // Modifiers
+    modifier validUsername(string memory username) {
+        require(bytes(username).length >= MIN_USERNAME_LENGTH, "Username too short");
+        require(bytes(username).length <= MAX_USERNAME_LENGTH, "Username too long");
+        require(usernameToAddress[username] == address(0), "Username already taken");
+        require(isValidUsername(username), "Invalid username format");
+        _;
+    }
+    
+    modifier profileExists(address user) {
+        require(profiles[user].exists, "Profile does not exist");
+        _;
+    }
+    
+    // Constructor
+    constructor() Ownable(msg.sender)  {}
+    
+    // Create a new profile
+    function createProfile(
+        string memory ipfsCID,
+        string memory username
+    ) external validUsername(username) nonReentrant {
+        require(!profiles[msg.sender].exists, "Profile already exists");
+        require(bytes(ipfsCID).length > 0, "IPFS CID cannot be empty");
+        
+        // Create profile
+        profiles[msg.sender] = Profile({
+            ipfsCID: ipfsCID,
+            username: username,
+            createdAt: block.timestamp,
+            updatedAt: block.timestamp,
+            views: 0,
+            exists: true
+        });
+        
+        // Register username
+        usernameToAddress[username] = msg.sender;
+        addressToUsername[msg.sender] = username;
+        
+        // Add to users array
+        allUsers.push(msg.sender);
+        totalProfiles++;
+        
+        emit ProfileCreated(msg.sender, ipfsCID, block.timestamp);
+        emit UsernameRegistered(msg.sender, username, block.timestamp);
+    }
 }
