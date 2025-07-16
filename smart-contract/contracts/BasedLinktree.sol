@@ -116,4 +116,21 @@ contract BaseLinktree is Ownable, ReentrancyGuard {
                isValidUsername(username);
     }
     
+    // Get all users (paginated)
+    function getUsers(uint256 offset, uint256 limit) external view returns (address[] memory) {
+        require(offset < allUsers.length, "Offset out of bounds");
+        
+        uint256 end = offset + limit;
+        if (end > allUsers.length) {
+            end = allUsers.length;
+        }
+        
+        address[] memory result = new address[](end - offset);
+        for (uint256 i = offset; i < end; i++) {
+            result[i - offset] = allUsers[i];
+        }
+        
+        return result;
+    }
+ 
 }
