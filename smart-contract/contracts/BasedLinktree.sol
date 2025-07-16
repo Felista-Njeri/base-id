@@ -102,4 +102,18 @@ contract BaseLinktree is Ownable, ReentrancyGuard {
         return profiles[userAddress];
     }
     
+    // Record a profile view (can be called by anyone)
+    function recordView(address profileOwner) external profileExists(profileOwner) {
+        profiles[profileOwner].views++;
+        emit ProfileViewed(msg.sender, profileOwner, block.timestamp);
+    }
+    
+    // Check if username is available
+    function isUsernameAvailable(string memory username) external view returns (bool) {
+        return usernameToAddress[username] == address(0) && 
+               bytes(username).length >= MIN_USERNAME_LENGTH && 
+               bytes(username).length <= MAX_USERNAME_LENGTH &&
+               isValidUsername(username);
+    }
+    
 }
